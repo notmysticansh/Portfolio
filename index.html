@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dixit Sinha | Minecraft Portfolio Realm</title>
+
+  <!-- Google Pixel Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+
+  <!-- GSAP & SkinView3D v3.4.1 Official Bundle -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/skinview3d@3.4.1/bundles/skinview3d.bundle.js"></script>
+
+  <style>
+    /* RESET & BASE PIXEL STYLES */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: 'VT323', monospace;
+      background-color: #050505;
+      color: #ffffff;
+    }
+
+    /* LOCAL & SHADER BACKGROUND SCENES */
+    #bg-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    .bg-scene {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      opacity: 0;
+      transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+      transform: scale(1.05);
+    }
+
+    .bg-scene.active {
+      opacity: 1;
+      transform: scale(1);
+      transition: opacity 0.8s ease, transform 10s ease-out;
+    }
+
+    /* MAPPED DIRECTLY TO YOUR VS CODE FOLDER IMAGES */
+    #bg-tab-1 { 
+      background-image: linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.45)), 
+      url('Cherry blossom Minecraft.jpg'),
+      url('try.png'),
+      url('https://images.alphacoders.com/132/1328328.png'); 
+    }
+    #bg-tab-2 { 
+      background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.5)), 
+      url('Стол зачарования.jpg'),
+      url('download.jpg'),
+      url('https://wallpapercave.com/wp/wp6864115.jpg'); 
+    }
+    #bg-tab-3 { 
+      background-image: linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.45)), 
+      url('Minecraft Glorious Lush Cave.jpg'),
+      url('https://wallpapercave.com/wp/wp9485805.jpg'); 
+    }
+    #bg-tab-4 { 
+      background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.5)), 
+      url('download.jpg'),
+      url('https://wallpapercave.com/wp/wp6864147.jpg'); 
+    }
+
+    .vignette {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      box-shadow: inset 0 0 140px rgba(0,0,0,0.88);
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .viewport {
+      position: relative;
+      z-index: 3;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+    }
+
+    /* AUTHENTIC MINECRAFT GUI WINDOW */
+    .mc-gui-window {
+      background-color: #c6c6c6;
+      border: 4px solid #000;
+      box-shadow: 
+        inset 4px 4px 0px #ffffff,
+        inset -4px -4px 0px #555555,
+        0 16px 40px rgba(0,0,0,0.8);
+      width: 100%;
+      max-width: 1100px;
+      height: calc(100vh - 170px);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      margin-top: 6px;
+    }
+
+    .mc-gui-header {
+      background-color: #a8a8a8;
+      border-bottom: 4px solid #373737;
+      padding: 6px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 11px;
+      color: #202020;
+      text-shadow: 1px 1px 0px #e0e0e0;
+    }
+
+    .mc-gui-body {
+      flex: 1;
+      padding: 16px;
+      display: flex;
+      gap: 16px;
+      overflow: hidden;
+      background-color: #c6c6c6;
+    }
+
+    .mc-content-panel {
+      flex: 1;
+      background-color: #8b8b8b;
+      border: 3px solid #373737;
+      box-shadow: inset 3px 3px 0px #373737, inset -3px -3px 0px #ffffff;
+      padding: 22px;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .mc-content-panel::-webkit-scrollbar { width: 12px; }
+    .mc-content-panel::-webkit-scrollbar-track { background: #373737; }
+    .mc-content-panel::-webkit-scrollbar-thumb { background: #c6c6c6; border: 2px solid #000; }
+
+    .tab-content { display: none; opacity: 0; }
+    .tab-content.active { display: block; opacity: 1; }
+
+    /* 3D AVATAR PANEL */
+    .mc-avatar-panel {
+      width: 310px;
+      background-color: #8b8b8b;
+      border: 3px solid #373737;
+      box-shadow: inset 3px 3px 0px #373737, inset -3px -3px 0px #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px;
+    }
+
+    .avatar-view-box {
+      width: 100%;
+      height: 330px;
+      background: radial-gradient(circle, #3a3a3a 0%, #151515 100%);
+      border: 3px solid #000;
+      position: relative;
+      box-shadow: inset 2px 2px 6px rgba(0,0,0,0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    #skin_container {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #skin_container canvas {
+      width: 100% !important;
+      height: 100% !important;
+      cursor: grab;
+    }
+    #skin_container canvas:active { cursor: grabbing; }
+
+    .avatar-card-info {
+      width: 100%;
+      background-color: #2b2b2b;
+      border: 2px solid #000;
+      padding: 10px;
+      text-align: center;
+      margin-top: 8px;
+    }
+
+    .player-title {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 13px;
+      color: #ffaa00;
+      text-shadow: 2px 2px 0px #000;
+      margin-bottom: 6px;
+    }
+
+    .player-subtitle {
+      font-size: 18px;
+      color: #55ffff;
+      text-shadow: 1px 1px 0px #000;
+    }
+
+    /* CONTENT TAB STYLING */
+    .tab-title {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 18px;
+      color: #ffff55;
+      text-shadow: 2px 2px 0px #3f3f00, -2px -2px 0px #000;
+      margin-bottom: 16px;
+      border-bottom: 2px dashed #ffff55;
+      padding-bottom: 8px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: #2e2e2e;
+      border: 2px solid #000;
+      padding: 10px;
+      box-shadow: inset 2px 2px 0px #4a4a4a;
+      cursor: pointer;
+    }
+
+    .stat-label { color: #aaa; font-size: 16px; }
+    .stat-value { color: #55ff55; font-size: 22px; font-weight: bold; text-shadow: 1px 1px 0px #000; }
+
+    .advancement-box {
+      background-color: #211502;
+      border: 3px solid #ffaa00;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 15px;
+      box-shadow: 0 0 10px rgba(255, 170, 0, 0.3);
+      cursor: pointer;
+    }
+
+    .advancement-icon {
+      width: 40px; height: 40px; background: #ffaa00;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; border: 2px solid #fff;
+    }
+
+    /* SKILLS & BUILDS */
+    .skill-item { margin-bottom: 16px; background: #2b2b2b; border: 2px solid #000; padding: 10px; cursor: pointer; }
+    .skill-header { display: flex; justify-content: space-between; font-size: 20px; margin-bottom: 4px; }
+    .skill-name { color: #55ffff; text-shadow: 1px 1px 0px #000; }
+    .skill-level { color: #ff55ff; font-family: 'Press Start 2P', cursive; font-size: 11px; }
+
+    .progress-bar-outer { width: 100%; height: 18px; background: #111; border: 2px solid #555; position: relative; }
+    .progress-bar-inner { height: 100%; background: linear-gradient(90deg, #aa00aa 0%, #ff55ff 100%); width: 0%; transition: width 0.8s ease-out; }
+
+    .builds-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+    .build-card {
+      background: #2b2b2b; border: 3px solid #000; padding: 12px;
+      display: flex; flex-direction: column; gap: 8px; transition: transform 0.25s, border-color 0.25s;
+      cursor: pointer;
+    }
+    .build-card:hover { border-color: #ffff55; transform: translateY(-3px); }
+    .build-title { font-size: 22px; color: #ffaa00; display: flex; justify-content: space-between; align-items: center; }
+    .build-desc { font-size: 18px; color: #ddd; }
+
+    .mc-btn {
+      display: inline-block; background: #727272; border: 2px solid #000;
+      box-shadow: inset 2px 2px 0px #a8a8a8, inset -2px -2px 0px #3b3b3b;
+      color: #ffffff; padding: 6px 12px; font-family: 'Press Start 2P', cursive;
+      font-size: 10px; text-decoration: none; cursor: pointer; text-align: center;
+      text-shadow: 1px 1px 0px #000; margin-top: 6px; align-self: flex-start;
+    }
+    .mc-btn:hover { background: #8b8b8b; color: #ffff55; }
+    .mc-btn:active { box-shadow: inset 2px 2px 0px #3b3b3b, inset -2px -2px 0px #a8a8a8; }
+
+    .trade-list { display: flex; flex-direction: column; gap: 12px; }
+    .trade-row { background: #2b2b2b; border: 3px solid #000; padding: 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+    .trade-item { display: flex; align-items: center; gap: 10px; font-size: 20px; }
+    .trade-arrow { color: #ff5555; font-family: 'Press Start 2P', cursive; font-size: 16px; }
+
+    /* REALISTIC HUD & SEGMENTED XP BAR */
+    .hud-wrapper { display: flex; flex-direction: column; align-items: center; gap: 6px; z-index: 10; }
+    .status-bars { display: flex; justify-content: space-between; width: 480px; max-width: 95vw; padding: 0 4px; }
+    .bar-group { display: flex; gap: 2px; align-items: center; }
+
+    .pixel-hud-icon {
+      width: 18px;
+      height: 18px;
+      display: inline-block;
+      image-rendering: pixelated;
+    }
+
+    /* BLOCKY MINECRAFT XP BAR */
+    .xp-bar-container { 
+      width: 480px; 
+      max-width: 95vw; 
+      height: 12px; 
+      background-color: #0d0d0d; 
+      border: 2px solid #000000; 
+      box-shadow: inset 0 0 0 1px #3a3a3a;
+      position: relative; 
+      display: flex;
+      padding: 1px;
+      gap: 1px;
+    }
+
+    .xp-segment {
+      flex: 1;
+      height: 100%;
+      background-color: #80FF20;
+      border-top: 1px solid #C0FF80;
+      border-bottom: 1px solid #40A000;
+      box-shadow: inset -1px 0 0 #308000;
+    }
+
+    .xp-segment.empty {
+      background-color: #1a1a1a;
+      border-top: 1px solid #2a2a2a;
+      border-bottom: 1px solid #0a0a0a;
+      box-shadow: none;
+    }
+
+    .xp-level-number {
+      position: absolute; 
+      top: -11px; 
+      left: 50%; 
+      transform: translateX(-50%);
+      font-family: 'Press Start 2P', cursive; 
+      font-size: 14px; 
+      color: #80FF20;
+      text-shadow: 2px 0 0 #000, -2px 0 0 #000, 0 2px 0 #000, 0 -2px 0 #000, 1px 1px 0 #000;
+      z-index: 5;
+    }
+
+    /* HOTBAR STYLES */
+    .hotbar-container {
+      background: #8b8b8b; border: 4px solid #000;
+      box-shadow: inset 3px 3px 0px #ffffff, inset -3px -3px 0px #555555;
+      display: flex; padding: 3px; gap: 3px;
+    }
+    .hotbar-slot {
+      width: 52px; height: 52px; background: #8b8b8b; border: 3px solid #373737;
+      box-shadow: inset 3px 3px 0px #373737, inset -3px -3px 0px #ffffff;
+      display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+    .hotbar-slot:hover { transform: scale(1.06); }
+    .hotbar-slot.active {
+      border: 4px solid #ffffff; box-shadow: inset 2px 2px 0px #000, inset -2px -2px 0px #000;
+      outline: 2px solid #000; z-index: 2; transform: scale(1.08);
+    }
+    .slot-key { position: absolute; top: 2px; left: 4px; font-family: 'Press Start 2P', cursive; font-size: 8px; color: #aaa; }
+    
+    .item-img { 
+      width: 34px; 
+      height: 34px; 
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.8));
+    }
+
+    .item-count { position: absolute; bottom: 2px; right: 4px; font-family: 'VT323', monospace; font-size: 18px; color: #ffffff; text-shadow: 2px 2px 0px #000; font-weight: bold; }
+
+    .mc-tooltip {
+      position: fixed; pointer-events: none; background-color: #100028; border: 3px solid #28004d;
+      box-shadow: 0 0 0 2px #100028, inset 0 0 10px rgba(120, 0, 255, 0.4);
+      padding: 6px 12px; color: #ffffff; font-family: 'VT323', monospace; font-size: 20px; z-index: 1000; display: none; white-space: nowrap;
+    }
+    .tooltip-title { color: #ff55ff; }
+    .tooltip-sub { color: #55ffff; font-size: 16px; }
+
+    @media (max-width: 850px) {
+      .mc-gui-window { height: calc(100vh - 200px); }
+      .mc-gui-body { flex-direction: column-reverse; overflow-y: auto; }
+      .mc-avatar-panel { width: 100%; height: auto; flex-direction: column; }
+      .avatar-view-box { width: 100%; height: 250px; }
+      .status-bars, .xp-bar-container { width: 100%; }
+      .hotbar-slot { width: 38px; height: 38px; }
+      .item-img { width: 24px; height: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- PURE CHILL MINECRAFT C418 SOUNDTRACK ("SWEDEN") -->
+  <audio id="bg_music" loop crossorigin="anonymous" preload="auto">
+    <source src="https://archive.org/download/sweden_vinyl/Sweden.mp3" type="audio/mpeg">
+    <source src="https://ia800902.us.archive.org/26/items/minecraft-soundtrack-c418/C418%20-%20Minecraft%20-%20Volume%20Alpha%20-%2008%20-%20Sweden.mp3" type="audio/mpeg">
+  </audio>
+
+  <!-- BACKGROUND SHADER LOCATIONS -->
+  <div id="bg-container">
+    <div id="bg-tab-1" class="bg-scene active"></div>
+    <div id="bg-tab-2" class="bg-scene"></div>
+    <div id="bg-tab-3" class="bg-scene"></div>
+    <div id="bg-tab-4" class="bg-scene"></div>
+  </div>
+
+  <div class="vignette"></div>
+
+  <!-- FLOATING MINECRAFT TOOLTIP -->
+  <div id="tooltip" class="mc-tooltip">
+    <div id="tooltip-title" class="tooltip-title">Item</div>
+    <div id="tooltip-sub" class="tooltip-sub">Category</div>
+  </div>
+
+  <!-- MAIN VIEWPORT -->
+  <div class="viewport">
+
+    <div class="mc-gui-window" id="mc-window">
+      <div class="mc-gui-header">
+        <span>DIXIT SINHA'S REALM - SURVIVAL INVENTORY</span>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <button class="mc-btn" id="music_btn" style="margin-top:0; padding:2px 8px; font-size:9px;" onclick="toggleMusic()">🎵 MUSIC: OFF</button>
+          <span style="color:#aa0000; cursor:pointer;" onclick="playMcClick()">[X]</span>
+        </div>
+      </div>
+
+      <div class="mc-gui-body">
+        
+        <!-- CONTENT PANEL -->
+        <div class="mc-content-panel" id="content-panel">
+
+          <!-- TAB 1: PLAYER PROFILE -->
+          <div id="tab-1" class="tab-content active">
+            <div class="tab-title">PLAYER STATS & PROFILE</div>
+            <p style="font-size: 20px; margin-bottom: 16px; color: #ffffff;">
+              Greetings, Traveller! I am <strong style="color:#ffff55;">Dixit Sinha</strong>, a student developer crafting interactive digital worlds and sandbox gaming tools.
+            </p>
+
+            <div class="stats-grid">
+              <div class="stat-card" onclick="playMcClick()">
+                <div class="stat-label">PRIMARY TAGLINE</div>
+                <div class="stat-value" style="font-size: 17px; color: #ffff55;">Student, Creative Dev & Sandbox Gamer</div>
+              </div>
+              <div class="stat-card" onclick="playMcClick()">
+                <div class="stat-label">BASE REALM</div>
+                <div class="stat-value">India 🇮🇳</div>
+              </div>
+              <div class="stat-card" onclick="playMcClick()">
+                <div class="stat-label">CURRENT STATUS</div>
+                <div class="stat-value" style="color: #55ffff; font-size: 17px;">Ready for new builds & quests</div>
+              </div>
+              <div class="stat-card" onclick="playMcClick()">
+                <div class="stat-label">GAME MODE</div>
+                <div class="stat-value" style="color: #ff5555;">Survival Hardcore</div>
+              </div>
+            </div>
+
+            <div class="advancement-box" onclick="playMcClick()">
+              <div class="advancement-icon">🏆</div>
+              <div>
+                <div style="font-family: 'Press Start 2P', cursive; font-size: 10px; color: #ffaa00;">ADVANCEMENT UNLOCKED!</div>
+                <div style="font-size: 20px; color: #fff;">World Builder - Crafting Next-Gen Interfaces</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 2: ENCHANTMENT SKILLS -->
+          <div id="tab-2" class="tab-content">
+            <div class="tab-title">ENCHANTMENT TABLE - SKILLS</div>
+            <div class="skill-item" onclick="playMcClick()">
+              <div class="skill-header">
+                <span class="skill-name">Coding & Logic</span>
+                <span class="skill-level">Level 92 (Sharpness V)</span>
+              </div>
+              <div class="progress-bar-outer"><div class="progress-bar-inner" data-progress="92%"></div></div>
+            </div>
+
+            <div class="skill-item" onclick="playMcClick()">
+              <div class="skill-header">
+                <span class="skill-name">Gaming (FPS & Sandbox)</span>
+                <span class="skill-level">Level 98 (Efficiency V)</span>
+              </div>
+              <div class="progress-bar-outer"><div class="progress-bar-inner" data-progress="98%"></div></div>
+            </div>
+
+            <div class="skill-item" onclick="playMcClick()">
+              <div class="skill-header">
+                <span class="skill-name">Studying & Academics</span>
+                <span class="skill-level">Level 88 (Unbreaking III)</span>
+              </div>
+              <div class="progress-bar-outer"><div class="progress-bar-inner" data-progress="88%"></div></div>
+            </div>
+
+            <div class="skill-item" onclick="playMcClick()">
+              <div class="skill-header">
+                <span class="skill-name">Drawing & Digital Art</span>
+                <span class="skill-level">Level 85 (Silk Touch)</span>
+              </div>
+              <div class="progress-bar-outer"><div class="progress-bar-inner" data-progress="85%"></div></div>
+            </div>
+          </div>
+
+          <!-- TAB 3: BUILDS / PROJECTS (ALL CARDS & BUTTONS CLICKABLE WITH SFX) -->
+          <div id="tab-3" class="tab-content">
+            <div class="tab-title">QUEST LOG & COMPLETED BUILDS</div>
+            <div class="builds-grid">
+              <div class="build-card" style="border-color: #ffaa00; background: #332613;" onclick="playMcClick()">
+                <div class="build-title">
+                  <span>Class XD Memories</span>
+                  <span style="font-size: 12px; font-family:'Press Start 2P'; color:#ffff55;">★ FEATURED</span>
+                </div>
+                <div class="build-desc">A nostalgic web application celebrating high school memories.</div>
+                <a href="https://notmysticansh.github.io/Class-XD-memories/" target="_blank" class="mc-btn" onclick="event.stopPropagation(); playMcClick();">VISIT BUILD ↗</a>
+              </div>
+
+              <div class="build-card" onclick="playMcClick()">
+                <div class="build-title">Minecraft Companion AI</div>
+                <div class="build-desc">Smart companion bot assisting with crafting recipes and automated world guidance.</div>
+                <span class="mc-btn" style="opacity: 0.85; cursor: pointer;" onclick="event.stopPropagation(); playMcClick();">COMPLETED QUEST</span>
+              </div>
+
+              <div class="build-card" onclick="playMcClick()">
+                <div class="build-title">Human Fall Flat Companion AI</div>
+                <div class="build-desc">Physics puzzle assistant bot for cooperative gameplay optimization.</div>
+                <span class="mc-btn" style="opacity: 0.85; cursor: pointer;" onclick="event.stopPropagation(); playMcClick();">COMPLETED QUEST</span>
+              </div>
+
+              <div class="build-card" onclick="playMcClick()">
+                <div class="build-title">Jarvis Personal Assistant</div>
+                <div class="build-desc">Custom desktop voice assistant for system automation and quick tasks.</div>
+                <span class="mc-btn" style="opacity: 0.85; cursor: pointer;" onclick="event.stopPropagation(); playMcClick();">COMPLETED QUEST</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 4: VILLAGE MARKET -->
+          <div id="tab-4" class="tab-content">
+            <div class="tab-title">VILLAGE TRADING POST</div>
+            <div class="trade-list">
+              <div class="trade-row" onclick="playMcClick()">
+                <div class="trade-item">
+                  <span style="color:#55ff55;">💎 1 Emerald</span>
+                  <span class="trade-arrow">➜</span>
+                  <span>YouTube (@Mystic_Ansh)</span>
+                </div>
+                <a href="https://www.youtube.com/@Mystic_Ansh" target="_blank" class="mc-btn" onclick="event.stopPropagation(); playMcClick();">TRADE ↗</a>
+              </div>
+
+              <div class="trade-row" onclick="playMcClick()">
+                <div class="trade-item">
+                  <span style="color:#55ff55;">💎 1 Emerald</span>
+                  <span class="trade-arrow">➜</span>
+                  <span>Instagram (@im_dixit_sinha)</span>
+                </div>
+                <a href="https://instagram.com/im_dixit_sinha" target="_blank" class="mc-btn" onclick="event.stopPropagation(); playMcClick();">TRADE ↗</a>
+              </div>
+
+              <div class="trade-row" onclick="playMcClick()">
+                <div class="trade-item">
+                  <span style="color:#55ff55;">💎 1 Emerald</span>
+                  <span class="trade-arrow">➜</span>
+                  <span>GitHub (notmysticansh)</span>
+                </div>
+                <a href="https://github.com/notmysticansh" target="_blank" class="mc-btn" onclick="event.stopPropagation(); playMcClick();">TRADE ↗</a>
+              </div>
+
+              <div class="trade-row" onclick="playMcClick()">
+                <div class="trade-item">
+                  <span style="color:#55ff55;">💎 1 Emerald</span>
+                  <span class="trade-arrow">➜</span>
+                  <span>Email (notmysticansh@gmail.com)</span>
+                </div>
+                <a href="mailto:notmysticansh@gmail.com" class="mc-btn" onclick="event.stopPropagation(); playMcClick();">SEND MAIL ↗</a>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- RIGHT 3D AVATAR PANEL -->
+        <div class="mc-avatar-panel">
+          <div class="avatar-view-box">
+            <div id="skin_container"></div>
+          </div>
+          
+          <div class="avatar-card-info">
+            <div class="player-title">DIXIT SINHA</div>
+            <div class="player-subtitle">Level 99 Adventurer</div>
+            <div style="font-size:13px; color:#aaa; margin-top:2px;">Drag model to rotate</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- HUD BOTTOM -->
+    <div class="hud-wrapper">
+      <div class="status-bars">
+        <div id="hearts-container" class="bar-group"></div>
+        <div id="hunger-container" class="bar-group"></div>
+      </div>
+
+      <!-- SEGMENTED BLOCKY MINECRAFT XP BAR -->
+      <div class="xp-bar-container" id="xp-bar">
+        <div class="xp-level-number">99</div>
+      </div>
+
+      <!-- HOTBAR WITH OFFICIAL REAL MINECRAFT ITEM PNGs -->
+      <div class="hotbar-container" id="hotbar">
+        
+        <!-- Slot 1: Diamond Sword -->
+        <div class="hotbar-slot active" data-tab="1" data-name="Player Profile" data-desc="Diamond Sword">
+          <span class="slot-key">1</span>
+          <img class="item-img" src="https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/1.19/assets/minecraft/textures/item/diamond_sword.png" alt="Diamond Sword">
+        </div>
+
+        <!-- Slot 2: Enchanted Book -->
+        <div class="hotbar-slot" data-tab="2" data-name="Enchantment Skills" data-desc="Enchanted Book">
+          <span class="slot-key">2</span>
+          <img class="item-img" src="https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/1.19/assets/minecraft/textures/item/enchanted_book.png" alt="Enchanted Book">
+        </div>
+
+        <!-- Slot 3: Crafting Table -->
+        <div class="hotbar-slot" data-tab="3" data-name="Lush Builds" data-desc="Crafting Table">
+          <span class="slot-key">3</span>
+          <img class="item-img" src="https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/1.19/assets/minecraft/textures/block/crafting_table_front.png" alt="Crafting Table">
+        </div>
+
+        <!-- Slot 4: Emerald -->
+        <div class="hotbar-slot" data-tab="4" data-name="Village Trading" data-desc="Emerald">
+          <span class="slot-key">4</span>
+          <img class="item-img" src="https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/1.19/assets/minecraft/textures/item/emerald.png" alt="Emerald">
+        </div>
+
+        <!-- Slot 5: Golden Apple -->
+        <div class="hotbar-slot" data-name="Golden Apple" data-desc="Restores Health x64">
+          <span class="slot-key">5</span>
+          <img class="item-img" src="https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/1.19/assets/minecraft/textures/item/golden_apple.png" alt="Golden Apple">
+          <span class="item-count">64</span>
+        </div>
+
+        <!-- Slot 6: Enchanted Bow -->
+        <div class="hotbar-slot" data-name="Enchanted Bow" data-desc="Power V, Infinity">
+          <span class="slot-key">6</span>
+          <img class="item-img" src="https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/1.19/assets/minecraft/textures/item/bow.png" alt="Bow">
+          <span class="item-count">1</span>
+        </div>
+
+        <!-- Slot 7: Bread -->
+        <div class="hotbar-slot" data-name="Bread" data-desc="Food Stack x16">
+          <span class="slot-key">7</span>
+          <img class="item-img" src="https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/1.19/assets/minecraft/textures/item/bread.png" alt="Bread">
+          <span class="item-count">16</span>
+        </div>
+
+        <!-- Slot 8: Compass -->
+        <div class="hotbar-slot" data-name="Compass" data-desc="Points to Spawn">
+          <span class="slot-key">8</span>
+          <img class="item-img" src="https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/1.19/assets/minecraft/textures/item/compass_16.png" alt="Compass">
+          <span class="item-count">1</span>
+        </div>
+
+        <!-- Slot 9: Nether Star -->
+        <div class="hotbar-slot" data-name="Nether Star" data-desc="Beacon Material">
+          <span class="slot-key">9</span>
+          <img class="item-img" src="https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/1.19/assets/minecraft/textures/item/nether_star.png" alt="Nether Star">
+          <span class="item-count">1</span>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    /* OFFICIAL MINECRAFT GAME "click.ogg" AUDIO PLAYER WITH SYNTH FALLBACK */
+    const mcClickAudio = new Audio("https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/1.8.4/assets/minecraft/sounds/random/click.ogg");
+    mcClickAudio.volume = 0.6;
+
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function playMcClick() {
+      if (mcClickAudio) {
+        mcClickAudio.currentTime = 0;
+        mcClickAudio.play().catch(() => synthMcClick());
+      } else {
+        synthMcClick();
+      }
+    }
+
+    function synthMcClick() {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(1150, now);
+      osc.frequency.exponentialRampToValueAtTime(350, now + 0.022);
+
+      gain.gain.setValueAtTime(0.12, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.022);
+
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.022);
+    }
+
+    /* BACKGROUND MINECRAFT AMBIENT MUSIC CONTROLLER */
+    const bgMusic = document.getElementById('bg_music');
+    const musicBtn = document.getElementById('music_btn');
+    let isMusicPlaying = false;
+
+    function toggleMusic() {
+      if (!bgMusic) return;
+      playMcClick();
+
+      if (isMusicPlaying) {
+        bgMusic.pause();
+        isMusicPlaying = false;
+        musicBtn.innerText = "🎵 MUSIC: OFF";
+        musicBtn.style.color = "#ffffff";
+      } else {
+        bgMusic.volume = 0.3;
+        const playPromise = bgMusic.play();
+        if (playPromise !== undefined) {
+          playPromise.then(() => {
+            isMusicPlaying = true;
+            musicBtn.innerText = "🎵 MUSIC: ON";
+            musicBtn.style.color = "#55ff55";
+          }).catch(e => {
+            console.warn("Audio policy error", e);
+          });
+        }
+      }
+    }
+
+    // Auto-start chill Minecraft music on first click anywhere on page
+    document.addEventListener('click', function startAmbientOnFirstClick() {
+      if (!isMusicPlaying && bgMusic) {
+        bgMusic.volume = 0.3;
+        bgMusic.play().then(() => {
+          isMusicPlaying = true;
+          if (musicBtn) {
+            musicBtn.innerText = "🎵 MUSIC: ON";
+            musicBtn.style.color = "#55ff55";
+          }
+        }).catch(() => {});
+      }
+    }, { once: true });
+
+    /* REALISTIC VANILLA MINECRAFT HEARTS & HUNGER SVGs */
+    const heartsContainer = document.getElementById('hearts-container');
+    const hungerContainer = document.getElementById('hunger-container');
+
+    const heartSVG = `<svg class="pixel-hud-icon" viewBox="0 0 9 9">
+      <path fill="#000000" d="M1 0h2v1H1z M6 0h2v1H6z M0 1h4v1H0z M5 1h4v1H5z M0 2h9v3H0z M1 5h7v1H1z M2 6h5v1H2z M3 7h3v1H3z M4 8h1v1H4z"/>
+      <path fill="#8b0000" d="M1 2h7v3H1z M2 5h5v1H2z M3 6h3v1H3z M4 7h1v1H4z"/>
+      <path fill="#ff0000" d="M1 1h2v1H1z M6 1h2v1H6z M1 2h3v2H1z M5 2h3v2H5z M2 4h5v1H2z M3 5h3v1H3z M4 6h1v1H4z"/>
+      <path fill="#ffffff" d="M2 1h1v1H2z M1 2h1v1H1z"/>
+    </svg>`;
+
+    const hungerSVG = `<svg class="pixel-hud-icon" viewBox="0 0 9 9">
+      <path fill="#000000" d="M3 0h3v1H3z M2 1h5v1H2z M1 2h7v1H1z M1 3h7v3H1z M2 6h5v1H2z M3 7h3v1H3z M0 6h2v1H0z M0 7h1v2H0z M1 8h2v1H1z"/>
+      <path fill="#e0e0e0" d="M0 7h1v1H0z M1 8h1v1H1z"/>
+      <path fill="#ffffff" d="M1 7h1v1H1z"/>
+      <path fill="#7a3d00" d="M2 3h6v3H2z M3 6h4v4H3z"/>
+      <path fill="#c66c0a" d="M3 1h3v1H3z M2 2h5v1H2z M2 3h5v3H2z M3 6h3v1H3z"/>
+      <path fill="#e09228" d="M3 1h2v1H3z M3 2h3v1H3z M2 3h3v2H2z"/>
+    </svg>`;
+
+    for(let i = 0; i < 10; i++) {
+      heartsContainer.innerHTML += heartSVG;
+      hungerContainer.innerHTML += hungerSVG;
+    }
+
+    /* RENDER BLOCKY SEGMENTED MINECRAFT XP BAR (18 NOTCHES) */
+    const xpBar = document.getElementById('xp-bar');
+    const totalSegments = 18;
+    const filledSegments = 16;
+    for(let i = 0; i < totalSegments; i++) {
+      const seg = document.createElement('div');
+      seg.className = `xp-segment ${i < filledSegments ? '' : 'empty'}`;
+      xpBar.appendChild(seg);
+    }
+
+    /* FIXED SKINVIEW3D ENGINE WITH CORRECT V3 ANIMATION SYNTAX */
+    let skinViewer = null;
+
+    function initSkin3D() {
+      const container = document.getElementById("skin_container");
+      if (!container) return;
+
+      container.innerHTML = "";
+
+      const w = container.clientWidth || 260;
+      const h = container.clientHeight || 320;
+
+      try {
+        skinViewer = new skinview3d.SkinViewer({
+          canvas: document.createElement("canvas"),
+          width: w,
+          height: h,
+          skin: "1000175297.png"
+        });
+
+        container.appendChild(skinViewer.canvas);
+
+        // Correct API Syntax for SkinView3D v3.x
+        skinViewer.animation = new skinview3d.WalkingAnimation();
+        skinViewer.autoRotate = true;
+        skinViewer.autoRotateSpeed = 0.8;
+
+        // Try load local skin file with fallback
+        skinViewer.loadSkin("1000175297.png").catch(function(err) {
+          console.warn("Local skin 1000175297.png load error, switching to fallback Steve.", err);
+          skinViewer.loadSkin("https://textures.minecraft.net/texture/3b60a1f6b53ea2f5a6e02a8ed3110915354972e38c35a828cb054942e1281");
+        });
+
+      } catch(e) {
+        console.error("3D SkinViewer Init Error:", e);
+      }
+    }
+
+    if (document.readyState === "complete") {
+      initSkin3D();
+    } else {
+      window.addEventListener("load", initSkin3D);
+    }
+
+    /* GSAP TAB TRANSITIONS */
+    const hotbarSlots = document.querySelectorAll('.hotbar-slot');
+    const tabContents = document.querySelectorAll('.tab-content');
+    const bgScenes = document.querySelectorAll('.bg-scene');
+
+    function switchTab(tabId) {
+      if(!tabId) return;
+      playMcClick();
+
+      hotbarSlots.forEach(slot => {
+        if(slot.getAttribute('data-tab') === tabId) slot.classList.add('active');
+        else if (slot.hasAttribute('data-tab')) slot.classList.remove('active');
+      });
+
+      bgScenes.forEach(scene => scene.classList.remove('active'));
+      const activeBg = document.getElementById(`bg-tab-${tabId}`);
+      if(activeBg) activeBg.classList.add('active');
+
+      const targetTab = document.getElementById(`tab-${tabId}`);
+      tabContents.forEach(tab => {
+        if(tab.classList.contains('active')) {
+          gsap.to(tab, { opacity: 0, y: -15, scale: 0.98, duration: 0.2, onComplete: () => {
+            tab.classList.remove('active');
+            tab.style.display = 'none';
+          }});
+        }
+      });
+
+      setTimeout(() => {
+        if(targetTab) {
+          targetTab.style.display = 'block';
+          targetTab.classList.add('active');
+          
+          gsap.fromTo(targetTab, 
+            { opacity: 0, y: 25, scale: 0.96 }, 
+            { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: "back.out(1.2)" }
+          );
+
+          if(tabId === "2") {
+            document.querySelectorAll('.progress-bar-inner').forEach(bar => {
+              bar.style.width = '0%';
+              setTimeout(() => { bar.style.width = bar.getAttribute('data-progress'); }, 100);
+            });
+          }
+        }
+      }, 200);
+    }
+
+    hotbarSlots.forEach(slot => {
+      slot.addEventListener('click', () => {
+        const tabId = slot.getAttribute('data-tab');
+        if(tabId) switchTab(tabId);
+        else playMcClick();
+      });
+
+      slot.addEventListener('mouseenter', (e) => {
+        const name = slot.getAttribute('data-name');
+        const desc = slot.getAttribute('data-desc');
+        if(name) showTooltip(e, name, desc);
+      });
+      slot.addEventListener('mousemove', (e) => moveTooltip(e));
+      slot.addEventListener('mouseleave', () => hideTooltip());
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (['1', '2', '3', '4'].includes(e.key)) {
+        switchTab(e.key);
+      }
+    });
+
+    /* TOOLTIP SYSTEM */
+    const tooltip = document.getElementById('tooltip');
+    const tooltipTitle = document.getElementById('tooltip-title');
+    const tooltipSub = document.getElementById('tooltip-sub');
+
+    function showTooltip(e, title, sub) {
+      tooltipTitle.innerText = title;
+      tooltipSub.innerText = sub || '';
+      tooltip.style.display = 'block';
+      moveTooltip(e);
+    }
+    function moveTooltip(e) {
+      tooltip.style.left = `${e.clientX + 14}px`;
+      tooltip.style.top = `${e.clientY - 35}px`;
+    }
+    function hideTooltip() { tooltip.style.display = 'none'; }
+  </script>
+</body>
+</html>
