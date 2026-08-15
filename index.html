@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Dixit Sinha | Minecraft Portfolio Realm</title>
 
   <!-- Google Pixel Fonts -->
@@ -28,6 +28,7 @@
     body, html {
       width: 100%;
       height: 100%;
+      height: 100dvh;
       overflow: hidden;
       font-family: 'VT323', monospace;
       background-color: #050505;
@@ -103,6 +104,7 @@
       z-index: 3;
       width: 100%;
       height: 100%;
+      height: 100dvh;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -121,6 +123,7 @@
       width: 100%;
       max-width: 1100px;
       height: calc(100vh - 170px);
+      height: calc(100dvh - 165px);
       display: flex;
       flex-direction: column;
       position: relative;
@@ -159,7 +162,7 @@
       position: relative;
     }
 
-    .mc-content-panel::-webkit-scrollbar { width: 12px; }
+    .mc-content-panel::-webkit-scrollbar { width: 10px; }
     .mc-content-panel::-webkit-scrollbar-track { background: #373737; }
     .mc-content-panel::-webkit-scrollbar-thumb { background: #c6c6c6; border: 2px solid #000; }
 
@@ -402,14 +405,146 @@
     .tooltip-title { color: #ff55ff; }
     .tooltip-sub { color: #55ffff; font-size: 16px; }
 
+    /* ==========================================
+       HIGHLY OPTIMIZED ANDROID / MOBILE MEDIA QUERIES
+       ========================================== */
     @media (max-width: 850px) {
-      .mc-gui-window { height: calc(100vh - 200px); }
-      .mc-gui-body { flex-direction: column-reverse; overflow-y: auto; }
-      .mc-avatar-panel { width: 100%; height: auto; flex-direction: column; }
-      .avatar-view-box { width: 100%; height: 250px; }
-      .status-bars, .xp-bar-container { width: 100%; }
-      .hotbar-slot { width: 38px; height: 38px; }
-      .item-img { width: 24px; height: 24px; }
+      .viewport {
+        padding: 6px;
+        gap: 6px;
+      }
+      .mc-gui-window {
+        height: calc(100dvh - 118px);
+        margin-top: 0;
+      }
+      .mc-gui-header {
+        padding: 4px 8px;
+        font-size: 8px;
+      }
+      .mc-gui-body {
+        padding: 8px;
+        gap: 8px;
+        flex-direction: column; /* Avatar Banner on Top, Content Panel Below */
+      }
+
+      /* COMPACT TOP BANNER FOR 3D AVATAR ON MOBILE (15% HEIGHT) */
+      .mc-avatar-panel {
+        width: 100%;
+        height: 105px;
+        flex-direction: row;
+        padding: 6px;
+        gap: 10px;
+        align-items: center;
+        flex-shrink: 0;
+      }
+      .avatar-view-box {
+        width: 80px;
+        height: 90px;
+        flex-shrink: 0;
+      }
+      .avatar-card-info {
+        flex: 1;
+        margin-top: 0;
+        padding: 6px;
+        text-align: left;
+        height: 90px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+      .player-title {
+        font-size: 10px;
+        margin-bottom: 2px;
+      }
+      .player-subtitle {
+        font-size: 14px;
+      }
+
+      /* EXPANDED CONTENT PANEL ON MOBILE (85% HEIGHT) */
+      .mc-content-panel {
+        padding: 10px;
+      }
+      .tab-title {
+        font-size: 13px;
+        margin-bottom: 8px;
+        padding-bottom: 4px;
+      }
+      p, .stat-label, .build-desc {
+        font-size: 15px !important;
+        line-height: 1.2;
+      }
+      .stat-value {
+        font-size: 16px !important;
+      }
+      .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 6px;
+        margin-bottom: 10px;
+      }
+      .stat-card, .skill-item, .build-card, .trade-row {
+        padding: 6px 8px;
+      }
+      .skill-header {
+        font-size: 16px;
+      }
+      .build-title {
+        font-size: 17px;
+      }
+      .trade-item {
+        font-size: 16px;
+      }
+      .advancement-box {
+        padding: 6px 8px;
+        gap: 8px;
+        margin-top: 8px;
+      }
+      .advancement-icon {
+        width: 30px;
+        height: 30px;
+        font-size: 16px;
+      }
+
+      /* COMPACT MOBILE HUD & HOTBAR (PERFECT FIT) */
+      .hud-wrapper {
+        gap: 3px;
+      }
+      .status-bars, .xp-bar-container {
+        width: 100%;
+        max-width: 345px;
+      }
+      .pixel-hud-icon {
+        width: 13px;
+        height: 13px;
+      }
+      .xp-bar-container {
+        height: 9px;
+      }
+      .xp-level-number {
+        font-size: 11px;
+        top: -9px;
+      }
+      .hotbar-container {
+        padding: 2px;
+        gap: 2px;
+      }
+      .hotbar-slot {
+        width: 35px;
+        height: 35px;
+      }
+      .item-img {
+        width: 22px;
+        height: 22px;
+      }
+      .item-count {
+        font-size: 12px;
+        bottom: 0px;
+        right: 2px;
+      }
+      .slot-key {
+        font-size: 7px;
+        top: 1px;
+        left: 2px;
+      }
     }
   </style>
 </head>
@@ -442,29 +577,42 @@
 
     <div class="mc-gui-window" id="mc-window">
       <div class="mc-gui-header">
-        <span>DIXIT SINHA'S REALM - SURVIVAL INVENTORY</span>
-        <div style="display:flex; align-items:center; gap:10px;">
-          <button class="mc-btn" id="music_btn" style="margin-top:0; padding:2px 8px; font-size:9px;" onclick="toggleMusic()">🎵 MUSIC: OFF</button>
+        <span>DIXIT SINHA'S REALM</span>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <button class="mc-btn" id="music_btn" style="margin-top:0; padding:2px 6px; font-size:8px;" onclick="toggleMusic()">🎵 MUSIC: OFF</button>
           <span style="color:#aa0000; cursor:pointer;" onclick="playMcClick()">[X]</span>
         </div>
       </div>
 
       <div class="mc-gui-body">
         
-        <!-- CONTENT PANEL -->
+        <!-- RIGHT 3D AVATAR PANEL (TOP COMPACT BANNER ON MOBILE) -->
+        <div class="mc-avatar-panel">
+          <div class="avatar-view-box">
+            <div id="skin_container"></div>
+          </div>
+          
+          <div class="avatar-card-info">
+            <div class="player-title">DIXIT SINHA</div>
+            <div class="player-subtitle">Level 99 Adventurer</div>
+            <div style="font-size:11px; color:#aaa; margin-top:2px;">Drag to rotate</div>
+          </div>
+        </div>
+
+        <!-- CONTENT PANEL (FULL HEIGHT ON MOBILE) -->
         <div class="mc-content-panel" id="content-panel">
 
           <!-- TAB 1: PLAYER PROFILE -->
           <div id="tab-1" class="tab-content active">
             <div class="tab-title">PLAYER STATS & PROFILE</div>
-            <p style="font-size: 20px; margin-bottom: 16px; color: #ffffff;">
+            <p style="font-size: 18px; margin-bottom: 12px; color: #ffffff;">
               Greetings, Traveller! I am <strong style="color:#ffff55;">Dixit Sinha</strong>, a student developer crafting interactive digital worlds and sandbox gaming tools.
             </p>
 
             <div class="stats-grid">
               <div class="stat-card" onclick="playMcClick()">
                 <div class="stat-label">PRIMARY TAGLINE</div>
-                <div class="stat-value" style="font-size: 17px; color: #ffff55;">Student, Creative Dev & Sandbox Gamer</div>
+                <div class="stat-value" style="font-size: 16px; color: #ffff55;">Student, Creative Dev & Sandbox Gamer</div>
               </div>
               <div class="stat-card" onclick="playMcClick()">
                 <div class="stat-label">BASE REALM</div>
@@ -472,7 +620,7 @@
               </div>
               <div class="stat-card" onclick="playMcClick()">
                 <div class="stat-label">CURRENT STATUS</div>
-                <div class="stat-value" style="color: #55ffff; font-size: 17px;">Ready for new builds & quests</div>
+                <div class="stat-value" style="color: #55ffff; font-size: 16px;">Ready for new builds & quests</div>
               </div>
               <div class="stat-card" onclick="playMcClick()">
                 <div class="stat-label">GAME MODE</div>
@@ -483,8 +631,8 @@
             <div class="advancement-box" onclick="playMcClick()">
               <div class="advancement-icon">🏆</div>
               <div>
-                <div style="font-family: 'Press Start 2P', cursive; font-size: 10px; color: #ffaa00;">ADVANCEMENT UNLOCKED!</div>
-                <div style="font-size: 20px; color: #fff;">World Builder - Crafting Next-Gen Interfaces</div>
+                <div style="font-family: 'Press Start 2P', cursive; font-size: 9px; color: #ffaa00;">ADVANCEMENT UNLOCKED!</div>
+                <div style="font-size: 16px; color: #fff;">World Builder - Crafting Next-Gen Interfaces</div>
               </div>
             </div>
           </div>
@@ -525,14 +673,14 @@
             </div>
           </div>
 
-          <!-- TAB 3: BUILDS / PROJECTS (ALL CARDS & BUTTONS CLICKABLE WITH SFX) -->
+          <!-- TAB 3: BUILDS / PROJECTS -->
           <div id="tab-3" class="tab-content">
             <div class="tab-title">QUEST LOG & COMPLETED BUILDS</div>
             <div class="builds-grid">
               <div class="build-card" style="border-color: #ffaa00; background: #332613;" onclick="playMcClick()">
                 <div class="build-title">
                   <span>Class XD Memories</span>
-                  <span style="font-size: 12px; font-family:'Press Start 2P'; color:#ffff55;">★ FEATURED</span>
+                  <span style="font-size: 10px; font-family:'Press Start 2P'; color:#ffff55;">★ FEATURED</span>
                 </div>
                 <div class="build-desc">A nostalgic web application celebrating high school memories.</div>
                 <a href="https://notmysticansh.github.io/Class-XD-memories/" target="_blank" class="mc-btn" onclick="event.stopPropagation(); playMcClick();">VISIT BUILD ↗</a>
@@ -600,19 +748,6 @@
             </div>
           </div>
 
-        </div>
-
-        <!-- RIGHT 3D AVATAR PANEL -->
-        <div class="mc-avatar-panel">
-          <div class="avatar-view-box">
-            <div id="skin_container"></div>
-          </div>
-          
-          <div class="avatar-card-info">
-            <div class="player-title">DIXIT SINHA</div>
-            <div class="player-subtitle">Level 99 Adventurer</div>
-            <div style="font-size:13px; color:#aaa; margin-top:2px;">Drag model to rotate</div>
-          </div>
         </div>
 
       </div>
@@ -812,7 +947,7 @@
       xpBar.appendChild(seg);
     }
 
-    /* FIXED SKINVIEW3D ENGINE WITH CORRECT V3 ANIMATION SYNTAX */
+    /* FIXED SKINVIEW3D ENGINE WITH RESPONSIVE CANVAS RESIZE */
     let skinViewer = null;
 
     function initSkin3D() {
@@ -843,6 +978,16 @@
         skinViewer.loadSkin("1000175297.png").catch(function(err) {
           console.warn("Local skin 1000175297.png load error, switching to fallback Steve.", err);
           skinViewer.loadSkin("https://textures.minecraft.net/texture/3b60a1f6b53ea2f5a6e02a8ed3110915354972e38c35a828cb054942e1281");
+        });
+
+        // Dynamic Resize Observer for Mobile / Screen Changes
+        window.addEventListener("resize", () => {
+          const nw = container.clientWidth;
+          const nh = container.clientHeight;
+          if (skinViewer && nw > 0 && nh > 0) {
+            skinViewer.width = nw;
+            skinViewer.height = nh;
+          }
         });
 
       } catch(e) {
